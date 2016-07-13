@@ -3,6 +3,7 @@ using System.Collections;
 
 public class Foods : MonoBehaviour
 {
+
     public float timeFade = 1f;
     public float fadespeed = 1f;
     public float fade;
@@ -31,19 +32,22 @@ public class Foods : MonoBehaviour
         //get render component to change alpha
         srFood = GetComponent<SpriteRenderer>();      
         startTime = Time.time;
-            
     }
     void Update () {
 
-        if (move){
-            transform.position -= new Vector3(0f, 1f * speed * Time.deltaTime, 0f);
+        //move down
+        if (move)
+        {
+            transform.position -= new Vector3(0f, 1f * speed* Time.deltaTime,0f);
             transform.Rotate(Vector3.back * 50 * Time.deltaTime);
-        }
 
-        if (transform.position.y < -camHeight && lostFood == false) {
-            move = false;
+        }
+        
+        // in the bottom the food stop and fade out
+        if(transform.position.y < -camHeight){
+            move = false; 
             fadeout = true;
-            LosePoint();
+            lostFood = true;  
         }
 
         //fade out and destroy
@@ -54,11 +58,6 @@ public class Foods : MonoBehaviour
         }
     }
 
-    void LosePoint()
-    {
-            GM.gmInstance.setScore(0, -1);
-            lostFood = true;
-    }
-
+   
 
 }

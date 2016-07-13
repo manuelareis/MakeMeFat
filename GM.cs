@@ -11,7 +11,7 @@ public class GM : MonoBehaviour
 
     public Text scoreText;
     public GameObject _slider;
-    public GameObject[] listFood;
+    public GameObject[] listFood;  
      
     public GameObject menuGamveOver;
     public GameObject menuChooseMode;
@@ -42,7 +42,7 @@ public class GM : MonoBehaviour
         gmInstance = this;
 
         //float widthInInches = Screen.width / Screen.dpi;
-        //Screen.orientation = ScreenOrientation.Landscape;
+        Screen.orientation = ScreenOrientation.Landscape;
 
         //get cam hieght and cam width
         cam = Camera.main;
@@ -59,7 +59,6 @@ public class GM : MonoBehaviour
         menuChooseMode.SetActive(true);
         menuPause.SetActive(false);
         menuTutorial.SetActive(false);
-
 
     }
 
@@ -86,7 +85,7 @@ public class GM : MonoBehaviour
         footCollider.enabled = false;
         //player = Instantiate(Resources.Load("Prefabs/Player", typeof(GameObject))) as GameObject;
         player = (GameObject)Instantiate(player, player.transform.position, Quaternion.identity);
-        waiter = (GameObject)Instantiate(waiter, waiter.transform.position, Quaternion.identity);
+        Instantiate(waiter, waiter.transform.position, Quaternion.identity);
         playerScript = player.GetComponent<PlayerScript>();
 
         playerScript.GoCutScene(scene2GyroTrueOrFalse);
