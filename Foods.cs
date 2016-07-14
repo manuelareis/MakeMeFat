@@ -3,11 +3,13 @@ using System.Collections;
 
 public class Foods : MonoBehaviour
 {
+    public enum Type { Food, BadThing, Power}
+    public Type type;
 
-    public float timeFade = 1f;
-    public float fadespeed = 1f;
-    public float fade;
-    public float speed = 5f;
+    float timeFade = 1f;
+    float fadespeed = 1f;
+    float fade;
+    public static float speed = 5f;
     
     //cam sizes
     Camera cam;
@@ -22,8 +24,7 @@ public class Foods : MonoBehaviour
     float startTime;
     float duration = 5f;
 
-    void Start()
-    {
+    void Start(){
         //cam sizes
         cam = Camera.main;
         camHeight =  cam.orthographicSize;
@@ -32,22 +33,33 @@ public class Foods : MonoBehaviour
         //get render component to change alpha
         srFood = GetComponent<SpriteRenderer>();      
         startTime = Time.time;
+
+        switch(type)
+        {
+            case Type.Food:
+                speed += 1f;
+                break;
+
+            case Type.BadThing:
+                speed += 3f;
+                break;
+
+            case Type.Power:
+                speed += 5f;
+                break;
+        }              
     }
     void Update () {
-
-        //move down
-        if (move)
-        {
-            transform.position -= new Vector3(0f, 1f * speed* Time.deltaTime,0f);
+        if (move){
+            transform.position -= new Vector3(0f, speed * Time.deltaTime, 0f);
             transform.Rotate(Vector3.back * 50 * Time.deltaTime);
-
         }
-        
-        // in the bottom the food stop and fade out
-        if(transform.position.y < -camHeight){
-            move = false; 
+
+        if (transform.position.y < -camHeight && lostFood == false) {
+            move = false;
             fadeout = true;
-            lostFood = true;  
+            if (type == Type.Food)
+                LosePoint();
         }
 
         //fade out and destroy
@@ -58,6 +70,13 @@ public class Foods : MonoBehaviour
         }
     }
 
-   
+    void LosePoint(){
+            GM.gmInstance.setScore(0, -1);
+            lostFood = true;
+    }
+
+    public void setSpeed(float vel){
+        speed = vel;
+    }
 
 }

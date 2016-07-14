@@ -11,7 +11,9 @@ public class GM : MonoBehaviour
 
     public Text scoreText;
     public GameObject _slider;
-    public GameObject[] listFood;  
+    public GameObject[] listFood;
+    public GameObject[] listBadThings;
+    public GameObject[] listPowers;
      
     public GameObject menuGamveOver;
     public GameObject menuChooseMode;
@@ -24,13 +26,17 @@ public class GM : MonoBehaviour
     [SerializeField]private float intFoodDelay = 0.01f;
     private int score = 0;
     private float life = 50f;
+    float foodQuant = 0.5f;
+    float badThingsQuant = 1f;
+    float powersQuant = 5f;
+    float speed = 1f;
 
     //cam sizes
     Camera cam;
     float camWidth;
     float camHeight;
 
-    bool boolgameOver = false;
+    bool b_gameOver = false;
     bool bonusExtra = false;
     bool isGyro = false;
 
@@ -42,7 +48,7 @@ public class GM : MonoBehaviour
         gmInstance = this;
 
         //float widthInInches = Screen.width / Screen.dpi;
-        Screen.orientation = ScreenOrientation.Landscape;
+        //Screen.orientation = ScreenOrientation.Landscape;
 
         //get cam hieght and cam width
         cam = Camera.main;
@@ -60,21 +66,17 @@ public class GM : MonoBehaviour
         menuPause.SetActive(false);
         menuTutorial.SetActive(false);
 
+
     }
 
     void Update()
     {
-        if (scene == Scene.scene2 && life > 0)
-        {
+        if (scene == Scene.scene2 && !b_gameOver) {
             life -= Time.deltaTime * 3;
         }
-        else if (life <= 0)
-        {
-            GameOver();
-        }
-
         HudManager.hudInstance.UpdateSlider(life);
     }
+
     //----SCENES----------------------
     //Scene 1: cut scene |  Scene2: the game
 
@@ -85,40 +87,67 @@ public class GM : MonoBehaviour
         footCollider.enabled = false;
         //player = Instantiate(Resources.Load("Prefabs/Player", typeof(GameObject))) as GameObject;
         player = (GameObject)Instantiate(player, player.transform.position, Quaternion.identity);
-        Instantiate(waiter, waiter.transform.position, Quaternion.identity);
+        waiter = (GameObject)Instantiate(waiter, waiter.transform.position, Quaternion.identity);
         playerScript = player.GetComponent<PlayerScript>();
 
         playerScript.GoCutScene(scene2GyroTrueOrFalse);
     }
-
     void setScene2()
     {
         scene = Scene.scene2;
-        InvokeRepeating("CreatFood", intFoodDelay, intFoodDelay);
-        InvokeRepeating("CreatFood", intFoodDelay, 0.2f);
-
+        if (!b_gameOver) {
+            StartCoroutine(StartCreating(listFood, foodQuant));
+            StartCoroutine(StartCreating(listBadThings, badThingsQuant));
+            StartCoroutine(StartCreating(listPowers, powersQuant));
+            IncreaseDificulty();
+            }
     }
     //-----------------------------------
-
-    public void CreatFood() //CREAT FOOD
+    public void CheckGameOver()
     {
-        _slider.SetActive(true);
-        
-        
         if (life > 0)
-        {
-            int ranFood = Random.Range(0, listFood.Length);
-            int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
-            Vector3 snackPosition = new Vector3(ranXposition, camHeight, 0f);
-            Instantiate(listFood[ranFood], snackPosition, Quaternion.identity);
+            b_gameOver = false;
+
+        else if (life < 0) { 
+            b_gameOver = true;
+            b_gameOver = true;
+            Time.timeScale = 0.5f;              //slowmotion
+
+            playerScript.setDead();
+
+            menuGamveOver.SetActive(true);
         }
-        else
-            GameOver();
     }
 
+    IEnumerator StartCreating(GameObject[] listToBeCreated, float timeQtFood){
+        _slider.SetActive(true);        
+                   
+        while (!b_gameOver){
+            CheckGameOver();
+            yield return new WaitForSeconds(timeQtFood);
+            int ranFood = Random.Range(0, listToBeCreated.Length );
+            int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
+            Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
+            Instantiate(listToBeCreated[ranFood], initalPosition, Quaternion.identity);
+            Foods.speed = speed;
+        }
+    }
+
+    IEnumerator IncreaseDificulty()
+    {
+        float dificulty = 1;
+        while (dificulty < 10)
+        {
+            yield return new WaitForSeconds(2);
+            speed += 5;
+            foodQuant -= 3f; //time
+            badThingsQuant -= 10;
+            dificulty += 1;
+        }
+    }
     public void setScore(int score, int life) //SET SCORE
     {
-        if (life < 100 || boolgameOver == false)
+        if (life < 100 || b_gameOver == false)
         {
             if (bonusExtra) //Set life and Bonus with Extra
             {
@@ -137,26 +166,11 @@ public class GM : MonoBehaviour
         else if (life >= 100)
             SetBonus();
     }
-
-    public void LoseLife(int num) //LOOSE LIFE
-    {
-        life -= num;
-    }
-
     public void SetBonus()
     {
         bonusExtra = true;
     }
 
-    public void GameOver()
-    {
-        boolgameOver = true;
-        Time.timeScale = 0.5f;              //slowmotion
-
-        playerScript.setDead();
-
-        menuGamveOver.SetActive(true);
-    }
 
 
 }

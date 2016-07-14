@@ -99,18 +99,14 @@ public class PlayerScript : MonoBehaviour
 
             print("pos: " + transform.position.x);
             if (gyroH < -0.1){
-                if (transform.position.x > -camWidth +1f)
-                    rb2d.AddRelativeForce(Vector2.left * Mathf.Abs(gyroH) * rbSpeed);
-                else if (transform.position.x < -camWidth +1f)
-                    rb2d.velocity = Vector2.zero;
+                if (transform.position.x > -camWidth + 1f){
+                    transform.Translate(Vector3.left * speed * Time.deltaTime);
+                }
             }
-
-
             else if (gyroH > 0.1){
-                if (transform.position.x < camWidth -1f)
-                    rb2d.AddRelativeForce(Vector2.right * Mathf.Abs(gyroH) * rbSpeed);
-                else if (transform.position.x > camWidth -1f)
-                    rb2d.velocity = Vector2.zero;
+                if (transform.position.x < camWidth - 1f){
+                    transform.Translate(Vector3.right * speed * Time.deltaTime);
+                }
             }
         }
     //---------------------------------------------------------------------------------

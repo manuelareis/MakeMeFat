@@ -26,19 +26,15 @@ public class HudManager : MonoBehaviour {
         btnContinue.onClick.AddListener(ContinueGame);
         btnTryAgain.onClick.AddListener(TryAgainBtn);
         btnTryAgainGO.onClick.AddListener(TryAgainBtn);
-
 	}		
     // Update is called once per frame
 	void PauseMenu () {
-
         Time.timeScale = 0f;
-        print("PAUSE");
-     
+        print("PAUSE");    
 	}
 
     void ContinueGame() {
         Time.timeScale = 1f;
-
     }
 
     public void TryAgainBtn()
@@ -47,12 +43,11 @@ public class HudManager : MonoBehaviour {
         Application.LoadLevel(0);
     }
 
-    public void SetGyro()
-    {
+    public void SetGyro() {
         GM.gmInstance.setScene1(true);
     }
-    public void SetTouch()
-    {
+
+    public void SetTouch(){
         GM.gmInstance.setScene1(false);
     }
 
@@ -68,7 +63,6 @@ public class HudManager : MonoBehaviour {
         slider.fillRect.rotation = new Quaternion(0,0,0,0);
         slider.fillRect.pivot = new Vector2(slider.fillRect.transform.parent.localPosition.x, slider.fillRect.pivot.y);
 
-
         if (slider.value > 0)
             slider.fillRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, sliderSize * slider.value);
 
@@ -77,6 +71,7 @@ public class HudManager : MonoBehaviour {
             slider.fillRect.Rotate(0,0,180);
             slider.fillRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, -1 * sliderSize * slider.value);
         }
+
         slider.fillRect.localPosition = new Vector3(0,0,0); 
     }
 

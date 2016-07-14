@@ -9,15 +9,12 @@ public class CameraScript : MonoBehaviour {
     bool movecam = true;
 
 	void Start () {
-	
 	}
 	
 	// Update is called once per frame
 	void Update () {
-
         //camera follows the player
         movement = new Vector3(Mathf.Clamp(character.transform.position.x, -10, 10), transform.position.y, transform.position.z);
         transform.position = movement;
-
 	}
 }
