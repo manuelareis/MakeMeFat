@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class PlayerScript : MonoBehaviour
 {
-    [HideInInspector]public static PlayerScript playerInstance;
-    [SerializeField]GameObject vomit;
+    [HideInInspector]
+    public static PlayerScript playerInstance;
+    [SerializeField]
+    GameObject vomit;
     Transform playerTransf;
     Rigidbody2D rb2d;
     Animator aninPlayer;
@@ -24,7 +26,8 @@ public class PlayerScript : MonoBehaviour
     Scene myScene;
 
     bool waiterInFront;
-    [SerializeField]bool isGyro = false;
+    [SerializeField]
+    bool isGyro = false;
 
     void Start()
     {
@@ -53,63 +56,72 @@ public class PlayerScript : MonoBehaviour
     {
         if (myScene == Scene.scene1)  //CUTSCENE
         {
-            if (waiterInFront) {
+            if (waiterInFront)
+            {
                 aninPlayer.SetTrigger("Down");
                 Waiter.waiter.SendMessage("fallWaiter");
                 GM.gmInstance.SendMessage("setScene2");
-                print("isgyro: " + isGyro);   
+                print("isgyro: " + isGyro);
                 if (isGyro)
                     myScene = Scene.scene2Gyro;
                 else
                     myScene = Scene.scene2Touch;
             }
-       }
+        }
     }
 
     void FixedUpdate()
     {
         //INPUT --------------------------------------------------------------------
-         if (myScene == Scene.scene2Touch) // WALK WITH TOUCH
+        if (myScene == Scene.scene2Touch) // WALK WITH TOUCH
         {
             if (Input.GetButton("Fire1"))
             {
-                aninPlayer.SetBool("walking", true); 
+                aninPlayer.SetBool("walking", true);
                 float pos = Input.mousePosition.x;
 
-                if (pos < Screen.width / 2){
-                    if (transform.position.x > -camWidth + 1f) {
+                if (pos < Screen.width / 2)
+                {
+                    if (transform.position.x > -camWidth + 1f)
+                    {
                         transform.Translate(Vector3.left * speed * Time.deltaTime);
                     }
                 }
 
-                else if (pos > Screen.width / 2){
-                    if (transform.position.x < camWidth - 1f) {
+                else if (pos > Screen.width / 2)
+                {
+                    if (transform.position.x < camWidth - 1f)
+                    {
                         transform.Translate(Vector3.right * speed * Time.deltaTime);
-                    }           
+                    }
                 }
             }
         }
 
         else if (myScene == Scene.scene2Gyro)     // WALK WITH GYRO
         {
-            aninPlayer.SetBool("walking", true); 
+            aninPlayer.SetBool("walking", true);
 
             Input.gyro.enabled = true;
             float gyroH = Input.gyro.gravity.x;
 
             print("pos: " + transform.position.x);
-            if (gyroH < -0.1){
-                if (transform.position.x > -camWidth + 1f){
+            if (gyroH < -0.1)
+            {
+                if (transform.position.x > -camWidth + 1f)
+                {
                     transform.Translate(Vector3.left * speed * Time.deltaTime);
                 }
             }
-            else if (gyroH > 0.1){
-                if (transform.position.x < camWidth - 1f){
+            else if (gyroH > 0.1)
+            {
+                if (transform.position.x < camWidth - 1f)
+                {
                     transform.Translate(Vector3.right * speed * Time.deltaTime);
                 }
             }
         }
-    //---------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------
     }
 
 
@@ -154,7 +166,7 @@ public class PlayerScript : MonoBehaviour
     public void GoCutScene(bool boolGyro)
     {
         isGyro = boolGyro;
-        
+
         if (waiterInFront)
         {
             aninPlayer.SetTrigger("Down");

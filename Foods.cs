@@ -1,16 +1,16 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class Foods : MonoBehaviour
 {
-    public enum Type { Food, BadThing, Power}
+    public enum Type { Food, BadThing, Power }
     public Type type;
 
     float timeFade = 1f;
     float fadespeed = 1f;
     float fade;
     public static float speed = 5f;
-    
+
     //cam sizes
     Camera cam;
     float camWidth;
@@ -24,17 +24,18 @@ public class Foods : MonoBehaviour
     float startTime;
     float duration = 5f;
 
-    void Start(){
+    void Start()
+    {
         //cam sizes
         cam = Camera.main;
-        camHeight =  cam.orthographicSize;
+        camHeight = cam.orthographicSize;
         camWidth = camHeight * cam.aspect;
 
         //get render component to change alpha
-        srFood = GetComponent<SpriteRenderer>();      
+        srFood = GetComponent<SpriteRenderer>();
         startTime = Time.time;
 
-        switch(type)
+        switch (type)
         {
             case Type.Food:
                 speed += 1f;
@@ -47,15 +48,18 @@ public class Foods : MonoBehaviour
             case Type.Power:
                 speed += 5f;
                 break;
-        }              
+        }
     }
-    void Update () {
-        if (move){
+    void Update()
+    {
+        if (move)
+        {
             transform.position -= new Vector3(0f, speed * Time.deltaTime, 0f);
             transform.Rotate(Vector3.back * 50 * Time.deltaTime);
         }
 
-        if (transform.position.y < -camHeight && lostFood == false) {
+        if (transform.position.y < -camHeight && lostFood == false)
+        {
             move = false;
             fadeout = true;
             if (type == Type.Food)
@@ -63,19 +67,22 @@ public class Foods : MonoBehaviour
         }
 
         //fade out and destroy
-        if (fadeout) {
+        if (fadeout)
+        {
             float t = (Time.time - startTime) / duration;
             srFood.material.color = new Color(1f, 1f, 1f, Mathf.SmoothStep(1f, 0.0f, t));
             Destroy(gameObject, 5f);
         }
     }
 
-    void LosePoint(){
-            GM.gmInstance.setScore(0, -1);
-            lostFood = true;
+    void LosePoint()
+    {
+        GM.gmInstance.setScore(0, -1);
+        lostFood = true;
     }
 
-    public void setSpeed(float vel){
+    public void setSpeed(float vel)
+    {
         speed = vel;
     }
 

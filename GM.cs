@@ -1,12 +1,14 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
 
 public class GM : MonoBehaviour
-    //Class responsable for game cycle 
+//Class responsable for game cycle 
 {
-    [HideInInspector]static public GM gmInstance; 
-    [SerializeField]private GameObject player, waiter;
+    [HideInInspector]
+    static public GM gmInstance;
+    [SerializeField]
+    private GameObject player, waiter;
     PlayerScript playerScript;
 
     public Text scoreText;
@@ -14,7 +16,7 @@ public class GM : MonoBehaviour
     public GameObject[] listFood;
     public GameObject[] listBadThings;
     public GameObject[] listPowers;
-     
+
     public GameObject menuGamveOver;
     public GameObject menuChooseMode;
     public GameObject menuPause;
@@ -22,8 +24,9 @@ public class GM : MonoBehaviour
 
     private BoxCollider2D footCollider;
     private bool hitWaiter = false;
-    private bool creatSnacks = false; 
-    [SerializeField]private float intFoodDelay = 0.01f;
+    private bool creatSnacks = false;
+    [SerializeField]
+    private float intFoodDelay = 0.01f;
     private int score = 0;
     private float life = 50f;
     float foodQuant = 0.5f;
@@ -44,7 +47,7 @@ public class GM : MonoBehaviour
     Scene scene;
 
     void Start()
-    {       
+    {
         gmInstance = this;
 
         //float widthInInches = Screen.width / Screen.dpi;
@@ -71,7 +74,8 @@ public class GM : MonoBehaviour
 
     void Update()
     {
-        if (scene == Scene.scene2 && !b_gameOver) {
+        if (scene == Scene.scene2 && !b_gameOver)
+        {
             life -= Time.deltaTime * 3;
         }
         HudManager.hudInstance.UpdateSlider(life);
@@ -95,12 +99,13 @@ public class GM : MonoBehaviour
     void setScene2()
     {
         scene = Scene.scene2;
-        if (!b_gameOver) {
+        if (!b_gameOver)
+        {
             StartCoroutine(StartCreating(listFood, foodQuant));
             StartCoroutine(StartCreating(listBadThings, badThingsQuant));
             StartCoroutine(StartCreating(listPowers, powersQuant));
             IncreaseDificulty();
-            }
+        }
     }
     //-----------------------------------
     public void CheckGameOver()
@@ -108,7 +113,8 @@ public class GM : MonoBehaviour
         if (life > 0)
             b_gameOver = false;
 
-        else if (life < 0) { 
+        else if (life < 0)
+        {
             b_gameOver = true;
             b_gameOver = true;
             Time.timeScale = 0.5f;              //slowmotion
@@ -119,13 +125,15 @@ public class GM : MonoBehaviour
         }
     }
 
-    IEnumerator StartCreating(GameObject[] listToBeCreated, float timeQtFood){
-        _slider.SetActive(true);        
-                   
-        while (!b_gameOver){
+    IEnumerator StartCreating(GameObject[] listToBeCreated, float timeQtFood)
+    {
+        _slider.SetActive(true);
+
+        while (!b_gameOver)
+        {
             CheckGameOver();
             yield return new WaitForSeconds(timeQtFood);
-            int ranFood = Random.Range(0, listToBeCreated.Length );
+            int ranFood = Random.Range(0, listToBeCreated.Length);
             int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
             Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
             Instantiate(listToBeCreated[ranFood], initalPosition, Quaternion.identity);
