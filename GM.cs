@@ -29,10 +29,13 @@ public class GM : MonoBehaviour
     private float intFoodDelay = 0.01f;
     private int score = 0;
     private float life = 50f;
-    float foodQuant = 0.5f;
-    float badThingsQuant = 1f;
+
+    float foodQuant = 2f;
+    float badThingsQuant = 3f;
     float powersQuant = 5f;
-    float speed = 1f;
+    float speedFood = 2f;
+    float speedPower = 5f;
+    float speedBadT = 3f;
 
     //cam sizes
     Camera cam;
@@ -45,6 +48,8 @@ public class GM : MonoBehaviour
 
     enum Scene { scene1, scene2 };
     Scene scene;
+
+    bool startGame = false;
 
     void Start()
     {
@@ -74,16 +79,19 @@ public class GM : MonoBehaviour
 
     void Update()
     {
+        CheckGameOver();
+
         if (scene == Scene.scene2 && !b_gameOver)
         {
             life -= Time.deltaTime * 3;
+            HudManager.hudInstance.UpdateSlider(life);
         }
-        HudManager.hudInstance.UpdateSlider(life);
-    }
 
+
+
+    }
     //----SCENES----------------------
     //Scene 1: cut scene |  Scene2: the game
-
     public void setScene1(bool scene2GyroTrueOrFalse) //receive from Hud if is Gyro Or Not
     {
         Time.timeScale = 1f;
@@ -96,16 +104,12 @@ public class GM : MonoBehaviour
 
         playerScript.GoCutScene(scene2GyroTrueOrFalse);
     }
-    void setScene2()
+    public void StartGame()
     {
-        scene = Scene.scene2;
-        if (!b_gameOver)
-        {
-            StartCoroutine(StartCreating(listFood, foodQuant));
-            StartCoroutine(StartCreating(listBadThings, badThingsQuant));
-            StartCoroutine(StartCreating(listPowers, powersQuant));
-            IncreaseDificulty();
-        }
+        _slider.SetActive(true);
+        StartCoroutine(CreatFood());
+        StartCoroutine(CreatPowers());
+        StartCoroutine(CreatBadThings());
     }
     //-----------------------------------
     public void CheckGameOver()
@@ -124,34 +128,52 @@ public class GM : MonoBehaviour
             menuGamveOver.SetActive(true);
         }
     }
-
-    IEnumerator StartCreating(GameObject[] listToBeCreated, float timeQtFood)
+    IEnumerator CreatFood()
     {
-        _slider.SetActive(true);
-
         while (!b_gameOver)
         {
-            CheckGameOver();
-            yield return new WaitForSeconds(timeQtFood);
-            int ranFood = Random.Range(0, listToBeCreated.Length);
+            yield return new WaitForSeconds(foodQuant);
             int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
             Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
-            Instantiate(listToBeCreated[ranFood], initalPosition, Quaternion.identity);
-            Foods.speed = speed;
+            int ranFood = Random.Range(0, listFood.Length);
+            GameObject instace = (GameObject)Instantiate(listFood[ranFood], initalPosition, Quaternion.identity);
+            instace.GetComponent<Foods>().setSpeed(speedFood);
+            print(" inside creatfood:" + speedFood);
         }
     }
-
-    IEnumerator IncreaseDificulty()
+    IEnumerator CreatBadThings()
     {
-        float dificulty = 1;
-        while (dificulty < 10)
+        while (!b_gameOver)
         {
-            yield return new WaitForSeconds(2);
-            speed += 5;
-            foodQuant -= 3f; //time
-            badThingsQuant -= 10;
-            dificulty += 1;
+            yield return new WaitForSeconds(badThingsQuant);
+            int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
+            Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
+            int ranFood = Random.Range(0, listBadThings.Length);
+            GameObject instace = (GameObject)Instantiate(listBadThings[ranFood], initalPosition, Quaternion.identity);
+            instace.GetComponent<Foods>().setSpeed(speedBadT);
+            print("inside creatBad:" + speedBadT);
         }
+    }
+    IEnumerator CreatPowers()
+    {
+        while (!b_gameOver)
+        {
+            yield return new WaitForSeconds(powersQuant);
+            int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
+            Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
+            int ranFood = Random.Range(0, listPowers.Length);
+            GameObject instace = (GameObject)Instantiate(listPowers[ranFood], initalPosition, Quaternion.identity);
+            instace.GetComponent<Foods>().setSpeed(speedPower);
+            print(" inside creatPower:" + speedPower);
+        }
+    }
+    void IncreaseDifficulty()
+    {
+        speedFood += 1f;
+        speedBadT += 1f;
+        speedPower += 1f;
+        foodQuant /= 2f;
+        badThingsQuant /= 2f;
     }
     public void setScore(int score, int life) //SET SCORE
     {
@@ -163,7 +185,6 @@ public class GM : MonoBehaviour
                 scoreText.text = ("S " + this.score);
                 this.life += life;
             }
-
             else
             {
                 this.score += score;                    //normal score and life
@@ -171,8 +192,18 @@ public class GM : MonoBehaviour
                 this.life += life;
             }
         }
-        else if (life >= 100)
+
+        if (score % 1.5f == 0)
+        {
+            IncreaseDifficulty();
+            print("Aumentou Dificuldade");
+        }
+
+        if (life >= 100)
+        {
             SetBonus();
+            print("BONUS!");
+        }
     }
     public void SetBonus()
     {

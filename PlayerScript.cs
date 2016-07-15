@@ -37,13 +37,13 @@ public class PlayerScript : MonoBehaviour
             Destroy(gameObject);
 
 
-        //cam sizes-------------------------
+        //cam sizes
         cam = Camera.main;
         camHeight = cam.orthographicSize;
         camWidth = camHeight * cam.aspect;
         print("Camheight " + camHeight);
 
-        //get components--------------------
+        //get components
         aninPlayer = GetComponentInChildren<Animator>();
         rb2d = GetComponent<Rigidbody2D>();
 
@@ -54,13 +54,14 @@ public class PlayerScript : MonoBehaviour
 
     void Update()
     {
-        if (myScene == Scene.scene1)  //CUTSCENE
+        //CUTSCENE
+        if (myScene == Scene.scene1)
         {
             if (waiterInFront)
             {
                 aninPlayer.SetTrigger("Down");
-                Waiter.waiter.SendMessage("fallWaiter");
-                GM.gmInstance.SendMessage("setScene2");
+                Waiter.waiter.fallWaiter();
+                GM.gmInstance.StartGame();
                 print("isgyro: " + isGyro);
                 if (isGyro)
                     myScene = Scene.scene2Gyro;
@@ -121,15 +122,10 @@ public class PlayerScript : MonoBehaviour
                 }
             }
         }
-        //---------------------------------------------------------------------------------
     }
-
-
-
     //COLLISIONS --------------------------
     void OnTriggerEnter2D(Collider2D other)
     {
-        print("colidiu " + other);
         if (other.gameObject.CompareTag("Waiter"))  // check collision with the waiter
         {
             waiterInFront = true;
@@ -183,10 +179,13 @@ public class PlayerScript : MonoBehaviour
     {
         aninPlayer.SetTrigger("Dead");
     }
-
     public void openMouth()
     {
         aninPlayer.SetBool("openMouth", true); // set animation of opening mouth
+    }
+    public void setSpeed()
+    {
+
     }
     //---------------------------------------
 }

@@ -9,7 +9,7 @@ public class Foods : MonoBehaviour
     float timeFade = 1f;
     float fadespeed = 1f;
     float fade;
-    public static float speed = 5f;
+    float speed = 1f;
 
     //cam sizes
     Camera cam;
@@ -35,20 +35,20 @@ public class Foods : MonoBehaviour
         srFood = GetComponent<SpriteRenderer>();
         startTime = Time.time;
 
-        switch (type)
+        /*switch(type)
         {
             case Type.Food:
-                speed += 1f;
+                speed += 0f;
                 break;
 
             case Type.BadThing:
-                speed += 3f;
+                speed += 1f;
                 break;
 
             case Type.Power:
-                speed += 5f;
+                speed += 2f;
                 break;
-        }
+        }      */
     }
     void Update()
     {
@@ -56,6 +56,7 @@ public class Foods : MonoBehaviour
         {
             transform.position -= new Vector3(0f, speed * Time.deltaTime, 0f);
             transform.Rotate(Vector3.back * 50 * Time.deltaTime);
+            print("Speed inside food: " + speed);
         }
 
         if (transform.position.y < -camHeight && lostFood == false)
@@ -86,4 +87,8 @@ public class Foods : MonoBehaviour
         speed = vel;
     }
 
+    public Type getType()
+    {
+        return type;
+    }
 }
