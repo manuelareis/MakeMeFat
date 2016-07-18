@@ -15,14 +15,13 @@ public class PlayerScript : MonoBehaviour
     float camHeight;
     float camWidth;
 
-    //static public PlayerScript player;
-    public float speed = 10f; // speed of chracter
+    public float speed = 10f;
     public float startLife = 50f;
     public float rbSpeed = 500;
 
     Touch touch;
 
-    enum Scene { scene1, scene2Touch, scene2Gyro }; //Parts of the game 
+    enum Scene { scene1, scene2Touch, scene2Gyro };
     Scene myScene;
 
     bool waiterInFront;
@@ -31,19 +30,17 @@ public class PlayerScript : MonoBehaviour
 
     void Start()
     {
+        //singleton mode, to make this script unique
         if (playerInstance == null)
             playerInstance = this;
         else
             Destroy(gameObject);
 
-
         //cam sizes
         cam = Camera.main;
         camHeight = cam.orthographicSize;
         camWidth = camHeight * cam.aspect;
-        print("Camheight " + camHeight);
 
-        //get components
         aninPlayer = GetComponentInChildren<Animator>();
         rb2d = GetComponent<Rigidbody2D>();
 
@@ -73,8 +70,9 @@ public class PlayerScript : MonoBehaviour
 
     void FixedUpdate()
     {
-        //INPUT --------------------------------------------------------------------
-        if (myScene == Scene.scene2Touch) // WALK WITH TOUCH
+        //INPUT CONTROLLERS --------------------------------------------------------------------
+        //if the player has chosen the tpouch mode this will be the input used
+        if (myScene == Scene.scene2Touch)
         {
             if (Input.GetButton("Fire1"))
             {
@@ -99,14 +97,14 @@ public class PlayerScript : MonoBehaviour
             }
         }
 
-        else if (myScene == Scene.scene2Gyro)     // WALK WITH GYRO
+        //change the controlers of the game for using gyroscope 
+        else if (myScene == Scene.scene2Gyro)
         {
             aninPlayer.SetBool("walking", true);
 
             Input.gyro.enabled = true;
             float gyroH = Input.gyro.gravity.x;
 
-            print("pos: " + transform.position.x);
             if (gyroH < -0.1)
             {
                 if (transform.position.x > -camWidth + 1f)
@@ -126,39 +124,45 @@ public class PlayerScript : MonoBehaviour
     //COLLISIONS --------------------------
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("Waiter"))  // check collision with the waiter
+        if (other.gameObject.CompareTag("Waiter"))
         {
             waiterInFront = true;
         }
-
-
-        else if (other.gameObject.CompareTag("Food")) // check collision with food 
+        else if (other.gameObject.CompareTag("Food"))
         {
             aninPlayer.SetTrigger("Eating");
             GM.gmInstance.setScore(10, 5);
             Destroy(other.gameObject);
         }
-
-        else if (other.gameObject.CompareTag("BadThing")) // check collision with food 
+        else if (other.gameObject.CompareTag("BadThing"))
         {
             aninPlayer.SetTrigger("ThrowUp");
             vomit.SetActive(true);
             GM.gmInstance.setScore(0, -10);
             Destroy(other.gameObject);
         }
+
+        //compare with especial food that gives the player some power
+        else if (other.gameObject.CompareTag("ChilliPower"))
+        {
+            // adicionar animacao  chilli
+            aninPlayer.SetTrigger("Eating");
+            GM.gmInstance.setScore(15, 10);
+            GM.gmInstance.StartCoroutine("PowerUpChilli");
+            Destroy(other.gameObject);
+        }
+
+        else if (other.gameObject.CompareTag("ApplePower"))
+        {
+            // adicionar animacao  apple
+            aninPlayer.SetTrigger("Eating");
+            GM.gmInstance.setScore(15, 10);
+            GM.gmInstance.StartCoroutine("PowerUpApple");
+            Destroy(other.gameObject);
+        }
     }
-    // ------------------------------------
 
-    //SET SCENES --------------------------
-    //public void startGame(bool isGyroScene2)
-    //{
-    //    isGyro = isGyroScene2;
-    //    myScene = Scene.scene1;
-    //    print("gyrofunc:" + isGyro);
-
-    //}
-
-    //MY FUNCTIONS ---------------------------
+    // The cutscene that happens before the game begins 
     public void GoCutScene(bool boolGyro)
     {
         isGyro = boolGyro;
@@ -183,9 +187,16 @@ public class PlayerScript : MonoBehaviour
     {
         aninPlayer.SetBool("openMouth", true); // set animation of opening mouth
     }
-    public void setSpeed()
-    {
 
+    public void SetSpeed(float value)
+    {
+        speed = value;
     }
+
+    public float GetSpeed()
+    {
+        return speed;
+    }
+
     //---------------------------------------
 }

@@ -56,7 +56,6 @@ public class Foods : MonoBehaviour
         {
             transform.position -= new Vector3(0f, speed * Time.deltaTime, 0f);
             transform.Rotate(Vector3.back * 50 * Time.deltaTime);
-            print("Speed inside food: " + speed);
         }
 
         if (transform.position.y < -camHeight && lostFood == false)
