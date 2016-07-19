@@ -12,15 +12,18 @@ public class GM : MonoBehaviour
     PlayerScript playerScript;
 
     public Text scoreText;
+    public Text coinText;
     public GameObject _slider;
     public GameObject[] listFood;
     public GameObject[] listBadThings;
     public GameObject[] listPowers;
+    public GameObject coin;
+
 
     public GameObject menuGamveOver;
     public GameObject menuChooseMode;
     public GameObject menuPause;
-    public GameObject menuTutorial;
+    public GameObject canvasMenu;
 
     private BoxCollider2D footCollider;
     private bool hitWaiter = false;
@@ -36,6 +39,7 @@ public class GM : MonoBehaviour
     float speedFood = 4f;
     float speedPower = 6f;
     float speedBadT = 5f;
+    int coins = 0;
 
     //cam sizes
     Camera cam;
@@ -51,9 +55,18 @@ public class GM : MonoBehaviour
 
     bool startGame = false;
 
+    bool score1 = true;
+    bool score2 = false;
+    bool score3 = false;
+    bool score4 = false;
+    bool score5 = false;
     void Start()
     {
-        gmInstance = this;
+        if (gmInstance != null)
+            Destroy(gameObject);
+        else
+            gmInstance = this;
+
 
         cam = Camera.main;
         camHeight = cam.orthographicSize;
@@ -68,8 +81,7 @@ public class GM : MonoBehaviour
         _slider.SetActive(false);
         menuChooseMode.SetActive(true);
         menuPause.SetActive(false);
-        menuTutorial.SetActive(false);
-
+        canvasMenu.SetActive(true);
 
     }
 
@@ -104,7 +116,7 @@ public class GM : MonoBehaviour
         StartCoroutine(CreatBadThings());
     }
     //-----------------------------------
-
+    //FOOD GENERATORS
     IEnumerator CreatFood()
     {
         while (!b_gameOver)
@@ -141,59 +153,72 @@ public class GM : MonoBehaviour
             instace.GetComponent<Foods>().setSpeed(speedPower);
         }
     }
+
+    IEnumerator CreatCoins()
+    {
+        while (!b_gameOver)
+        {
+            yield return new WaitForSeconds(30);
+            int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
+            Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
+            int ranFood = Random.Range(0, listPowers.Length);
+            GameObject instace = (GameObject)Instantiate(coin, initalPosition, Quaternion.identity);
+        }
+    }
+
+    //
     void IncreaseDifficulty()
     {
-        if (score == 100)
+        if (score >= 100 && score1 == true)
         {
-            speedFood += 1f;
-            speedBadT += 1f;
-            speedPower += 1f;
-            foodQuant -= 0.2f;
-            badThingsQuant -= 0.5f;
+            //1 -vel food,  2 -vel BadThings, 3- velPower, 4- Qt Food, 5- Qt BadThings and 6- level number
+            AddVel(1f, 1f, 1f, 0.2f, 0.5f, 1);
+            score1 = false;
+            score2 = true;
         }
 
-        else if (score == 400)
+        else if (score >= 400 && score2 == true)
         {
-            speedFood += 0.5f;
-            speedBadT += 0.5f;
-            speedPower += 0.5f;
-            foodQuant -= 0.2f;
-            badThingsQuant -= 0.2f;
-
+            AddVel(0.5f, 0.5f, 0.5f, 0.2f, 0.5f, 2);
+            score2 = false;
+            score3 = true;
         }
 
-        else if (score == 800)
+        else if (score >= 800 && score3 == true)
         {
-            speedFood += 0.5f;
-            speedBadT += 0.5f;
-            speedPower += 0.5f;
-            foodQuant -= 0.1f;
-            badThingsQuant -= 0.5f;
-
+            AddVel(0.5f, 0.5f, 0.5f, 0.1f, 0.5f, 3);
+            score3 = false;
+            score4 = true;
         }
 
-        else if (score == 1200)
+        else if (score >= 1200 && score4 == true)
         {
-            speedFood += 0.5f;
-            speedBadT += 0.5f;
-            speedPower += 0.5f;
-            foodQuant -= 0.1f;
-            badThingsQuant -= 0.5f;
-
+            AddVel(0.5f, 0.5f, 0.5f, 0.1f, 0.5f, 4);
+            score4 = false;
+            score5 = true;
         }
 
-        else if (score == 2000)
+        else if (score >= 2000 && score5 == true)
         {
-            speedFood += 1f;
-            speedBadT += 1f;
-            speedPower += 1f;
-            foodQuant -= 0.1f;
-            badThingsQuant -= 0.5f;
+            AddVel(0.5f, 0.5f, 0.5f, 0.1f, 0.5f, 5);
+            score5 = false;
         }
 
     }
 
-    public void setScore(int score, int life) //SET SCORE
+    //function used inside Increase difficulty
+    private void AddVel(float velFood, float velBadT, float velPower, float QtFood, float QtBadT, int numLevel)
+    {
+        speedFood += velFood;
+        speedBadT += velBadT;
+        speedPower += velPower;
+        foodQuant -= QtFood;
+        badThingsQuant -= QtBadT;
+        print(numLevel + " e qtBt: " + badThingsQuant);
+    }
+
+
+    public void setScore(int valuescore, int valuelife) //SET SCORE
     {
 
         CheckGameOver();
@@ -203,18 +228,18 @@ public class GM : MonoBehaviour
         {
             if (bonusExtra) //Set life and Bonus with Extra
             {
-                this.score += score + 10;               //Bonus extra of 10 points
-                scoreText.text = ("S " + this.score);
-                this.life += life;
+                score += valuescore + 10;               //Bonus extra of 10 points
+                scoreText.text = (score.ToString("000"));
+                life += valuelife;
             }
             else
             {
-                this.score += score;                    //normal score and life
-                scoreText.text = ("S " + this.score);
-                this.life += life;
+                score += valuescore;                    //normal score and life
+                scoreText.text = (score.ToString("000"));
+                life += valuelife;
             }
         }
-        if (life >= 100)
+        else if (life >= 100)
         {
             SetBonus();
             print("BONUS!");
@@ -250,6 +275,11 @@ public class GM : MonoBehaviour
         PlayerScript.playerInstance.SetSpeed(tempSpeed);
     }
 
+    public void Coins()
+    {
+
+    }
+
     public void CheckGameOver()
     {
         if (life > 0)
@@ -257,7 +287,6 @@ public class GM : MonoBehaviour
 
         else if (life < 0)
         {
-            b_gameOver = true;
             b_gameOver = true;
             Time.timeScale = 0.5f;              //slowmotion
 

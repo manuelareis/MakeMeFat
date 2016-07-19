@@ -131,7 +131,7 @@ public class PlayerScript : MonoBehaviour
         else if (other.gameObject.CompareTag("Food"))
         {
             aninPlayer.SetTrigger("Eating");
-            GM.gmInstance.setScore(10, 5);
+            GM.gmInstance.setScore(5, 5);
             Destroy(other.gameObject);
         }
         else if (other.gameObject.CompareTag("BadThing"))
@@ -158,6 +158,13 @@ public class PlayerScript : MonoBehaviour
             aninPlayer.SetTrigger("Eating");
             GM.gmInstance.setScore(15, 10);
             GM.gmInstance.StartCoroutine("PowerUpApple");
+            Destroy(other.gameObject);
+        }
+
+        else if (other.gameObject.CompareTag("Coin"))
+        {
+            // adicionar animacao  apple
+            aninPlayer.SetTrigger("Eating");
             Destroy(other.gameObject);
         }
     }

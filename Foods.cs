@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Foods : MonoBehaviour
 {
-    public enum Type { Food, BadThing, Power }
+    public enum Type { Food, BadThing, Power, Coin }
     public Type type;
 
     float timeFade = 1f;
@@ -70,14 +70,18 @@ public class Foods : MonoBehaviour
         if (fadeout)
         {
             float t = (Time.time - startTime) / duration;
-            srFood.material.color = new Color(1f, 1f, 1f, Mathf.SmoothStep(1f, 0.0f, t));
+            if (type == Type.Food)
+                srFood.material.color = new Color(1f, 0f, 0f, Mathf.SmoothStep(1f, 0.0f, t));
+            else
+                srFood.material.color = new Color(1f, 1f, 1f, Mathf.SmoothStep(1f, 0.0f, t));
+
             Destroy(gameObject, 5f);
         }
     }
 
     void LosePoint()
     {
-        GM.gmInstance.setScore(0, -1);
+        GM.gmInstance.setScore(0, -5);
         lostFood = true;
     }
 

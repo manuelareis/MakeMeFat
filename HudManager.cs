@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEditor.SceneManagement;
 
 public class HudManager : MonoBehaviour
 {
@@ -41,7 +42,7 @@ public class HudManager : MonoBehaviour
     public void TryAgainBtn()
     {
         Time.timeScale = 1f;
-        Application.LoadLevel(0);
+        EditorSceneManager.LoadScene("Game");
     }
 
     public void SetGyro()
