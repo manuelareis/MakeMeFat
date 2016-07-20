@@ -81,7 +81,7 @@ public class Foods : MonoBehaviour
 
     void LosePoint()
     {
-        GM.gmInstance.setScore(0, -5);
+        GM.gmInstance.setScore(0, -10);
         lostFood = true;
     }
 

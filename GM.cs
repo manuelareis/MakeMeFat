@@ -102,7 +102,7 @@ public class GM : MonoBehaviour
         footCollider.enabled = false;
         //player = Instantiate(Resources.Load("Prefabs/Player", typeof(GameObject))) as GameObject;
         player = (GameObject)Instantiate(player, player.transform.position, Quaternion.identity);
-        waiter = (GameObject)Instantiate(waiter, waiter.transform.position, Quaternion.identity);
+        waiter = (GameObject)Instantiate(waiter, new Vector3(-camWidth, -1.5f, 0f), Quaternion.identity);
         playerScript = player.GetComponent<PlayerScript>();
 
         playerScript.GoCutScene(scene2GyroTrueOrFalse);
@@ -280,12 +280,14 @@ public class GM : MonoBehaviour
 
     }
 
-    public void CheckGameOver()
+    private void CheckGameOver()
     {
         if (life > 0)
+        {
             b_gameOver = false;
+        }
 
-        else if (life < 0)
+        else
         {
             b_gameOver = true;
             Time.timeScale = 0.5f;              //slowmotion
@@ -294,6 +296,15 @@ public class GM : MonoBehaviour
 
             menuGamveOver.SetActive(true);
         }
+    }
+
+    public bool GetGamOver()
+    {
+        if (b_gameOver)
+            return true;
+
+        else
+            return false;
     }
 
 }

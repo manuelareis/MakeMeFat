@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 
 public class HudManager : MonoBehaviour
 {
@@ -42,7 +42,7 @@ public class HudManager : MonoBehaviour
     public void TryAgainBtn()
     {
         Time.timeScale = 1f;
-        EditorSceneManager.LoadScene("Game");
+        SceneManager.LoadScene("Game");
     }
 
     public void SetGyro()
@@ -78,8 +78,4 @@ public class HudManager : MonoBehaviour
 
         slider.fillRect.localPosition = new Vector3(0, 0, 0);
     }
-
-
-
-
 }

@@ -25,8 +25,8 @@ public class PlayerScript : MonoBehaviour
     Scene myScene;
 
     bool waiterInFront;
-    [SerializeField]
     bool isGyro = false;
+    bool isGameOver = false;
 
     void Start()
     {
@@ -57,7 +57,7 @@ public class PlayerScript : MonoBehaviour
             if (waiterInFront)
             {
                 aninPlayer.SetTrigger("Down");
-                Waiter.waiter.fallWaiter();
+                Waiter.waiterinstance.fallWaiter();
                 GM.gmInstance.StartGame();
                 print("isgyro: " + isGyro);
                 if (isGyro)
@@ -71,8 +71,9 @@ public class PlayerScript : MonoBehaviour
     void FixedUpdate()
     {
         //INPUT CONTROLLERS --------------------------------------------------------------------
-        //if the player has chosen the tpouch mode this will be the input used
-        if (myScene == Scene.scene2Touch)
+        //if the player has chosen the tpouch mode this will be the input used,
+        isGameOver = GM.gmInstance.GetGamOver();
+        if (myScene == Scene.scene2Touch && !isGameOver)
         {
             if (Input.GetButton("Fire1"))
             {
@@ -98,7 +99,7 @@ public class PlayerScript : MonoBehaviour
         }
 
         //change the controlers of the game for using gyroscope 
-        else if (myScene == Scene.scene2Gyro)
+        else if (myScene == Scene.scene2Gyro && !isGameOver)
         {
             aninPlayer.SetBool("walking", true);
 
@@ -138,7 +139,7 @@ public class PlayerScript : MonoBehaviour
         {
             aninPlayer.SetTrigger("ThrowUp");
             vomit.SetActive(true);
-            GM.gmInstance.setScore(0, -10);
+            GM.gmInstance.setScore(0, -20);
             Destroy(other.gameObject);
         }
 
@@ -177,7 +178,7 @@ public class PlayerScript : MonoBehaviour
         if (waiterInFront)
         {
             aninPlayer.SetTrigger("Down");
-            Waiter.waiter.SendMessage("fallWaiter");
+            Waiter.waiterinstance.SendMessage("fallWaiter");
             GM.gmInstance.SendMessage("setScene2");
             print("isgyro: " + isGyro);
             if (isGyro)
