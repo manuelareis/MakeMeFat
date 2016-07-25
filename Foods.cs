@@ -3,8 +3,10 @@ using System.Collections;
 
 public class Foods : MonoBehaviour
 {
-    public enum Type { Food, BadThing, Power, Coin }
-    public Type type;
+    [SerializeField]
+    enum Type { Food, BadThing, Power, Coin }
+    [SerializeField]
+    Type type;
 
     float timeFade = 1f;
     float fadespeed = 1f;
@@ -34,21 +36,6 @@ public class Foods : MonoBehaviour
         //get render component to change alpha
         srFood = GetComponent<SpriteRenderer>();
         startTime = Time.time;
-
-        /*switch(type)
-        {
-            case Type.Food:
-                speed += 0f;
-                break;
-
-            case Type.BadThing:
-                speed += 1f;
-                break;
-
-            case Type.Power:
-                speed += 2f;
-                break;
-        }      */
     }
     void Update()
     {
@@ -62,8 +49,26 @@ public class Foods : MonoBehaviour
         {
             move = false;
             fadeout = true;
-            if (type == Type.Food)
-                LosePoint();
+            switch (type)
+            {
+                case Type.Food:
+                    GM.gmInstance.contFoodsLost += 1;
+                    LosePoint();
+                    break;
+
+                case Type.BadThing:
+                    GM.gmInstance.contBadthingsLost += 1;
+                    break;
+
+                case Type.Power:
+                    GM.gmInstance.contPowerLost += 1;
+                    LosePoint();
+                    break;
+
+                case Type.Coin:
+                    GM.gmInstance.contCoinsLost += 1;
+                    break;
+            }
         }
 
         //fade out and destroy
@@ -90,8 +95,8 @@ public class Foods : MonoBehaviour
         speed = vel;
     }
 
-    public Type getType()
+    public string getType()
     {
-        return type;
+        return type.ToString();
     }
 }

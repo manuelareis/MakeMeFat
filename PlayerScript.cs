@@ -14,12 +14,13 @@ public class PlayerScript : MonoBehaviour
     Camera cam;
     float camHeight;
     float camWidth;
-
-    public float speed = 10f;
-    public float startLife = 50f;
-    public float rbSpeed = 500;
-
     Touch touch;
+
+    [SerializeField]
+    float speed = 10f;
+    [SerializeField]
+    float rbSpeed = 500;
+    float startLife = 50f;
 
     enum Scene { scene1, scene2Touch, scene2Gyro };
     Scene myScene;
@@ -35,7 +36,6 @@ public class PlayerScript : MonoBehaviour
             playerInstance = this;
         else
             Destroy(gameObject);
-
         //cam sizes
         cam = Camera.main;
         camHeight = cam.orthographicSize;
@@ -46,7 +46,6 @@ public class PlayerScript : MonoBehaviour
 
         waiterInFront = false;
         //aninPlayer.SetBool("down", false);
-
     }
 
     void Update()
@@ -97,7 +96,6 @@ public class PlayerScript : MonoBehaviour
                 }
             }
         }
-
         //change the controlers of the game for using gyroscope 
         else if (myScene == Scene.scene2Gyro && !isGameOver)
         {
@@ -134,6 +132,7 @@ public class PlayerScript : MonoBehaviour
             aninPlayer.SetTrigger("Eating");
             GM.gmInstance.setScore(5, 5);
             Destroy(other.gameObject);
+            GM.gmInstance.contFoodsEaten += 1;
         }
         else if (other.gameObject.CompareTag("BadThing"))
         {
@@ -141,6 +140,7 @@ public class PlayerScript : MonoBehaviour
             vomit.SetActive(true);
             GM.gmInstance.setScore(0, -20);
             Destroy(other.gameObject);
+            GM.gmInstance.contBadThingsEaten += 1;
         }
 
         //compare with especial food that gives the player some power
@@ -151,6 +151,7 @@ public class PlayerScript : MonoBehaviour
             GM.gmInstance.setScore(15, 10);
             GM.gmInstance.StartCoroutine("PowerUpChilli");
             Destroy(other.gameObject);
+            GM.gmInstance.contPowersEaten += 1;
         }
 
         else if (other.gameObject.CompareTag("ApplePower"))
@@ -160,6 +161,7 @@ public class PlayerScript : MonoBehaviour
             GM.gmInstance.setScore(15, 10);
             GM.gmInstance.StartCoroutine("PowerUpApple");
             Destroy(other.gameObject);
+            GM.gmInstance.contPowersEaten += 1;
         }
 
         else if (other.gameObject.CompareTag("Coin"))
@@ -167,6 +169,7 @@ public class PlayerScript : MonoBehaviour
             // adicionar animacao  apple
             aninPlayer.SetTrigger("Eating");
             Destroy(other.gameObject);
+            GM.gmInstance.contCoinsEaten += 1;
         }
     }
 

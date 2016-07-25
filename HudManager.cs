@@ -7,16 +7,25 @@ public class HudManager : MonoBehaviour
 {
     //class responsable for Buttons and Hud
 
+    [HideInInspector]
     public static HudManager hudInstance;
-    public Button btnContinue;
-    public Button btnPause;
-    public Button btnTryAgain;
-    public Button btnTryAgainGO;
-    public Button btnSetTouch;
-    public Button btnSetGyro;
+    [SerializeField]
+    Button btnContinue;
+    [SerializeField]
+    Button btnPause;
+    [SerializeField]
+    Button btnTryAgain;
+    [SerializeField]
+    Button btnTryAgainGO;
+    [SerializeField]
+    Button btnSetTouch;
+    [SerializeField]
+    Button btnSetGyro;
+    [SerializeField]
+    Slider slider;
+    [SerializeField]
+    float sliderSize;
 
-    public Slider slider;
-    public float sliderSize;
     void Start()
     {
         // btnPause.onClick.AddListener(() => { PauseMenu(); }); // if needed to accept any arguments 
@@ -58,6 +67,22 @@ public class HudManager : MonoBehaviour
     public void UpdateSlider(float value)
     {
         slider.value = value;
+
+        //Game Analytics values of slider 
+        if (slider.value < 30)
+        {
+            GM.gmInstance.sliderLess30 += Time.deltaTime;
+        }
+        else if (slider.value > 40 && slider.value < 70)
+        {
+            GM.gmInstance.sliderBtw40n70 += Time.deltaTime;
+        }
+        else if (slider.value > 100)
+        {
+            GM.gmInstance.sliderOver100 += Time.deltaTime;
+        }
+
+
         if (slider.value == 0)
         {
             sliderSize = slider.GetComponent<RectTransform>().rect.width;
@@ -77,5 +102,6 @@ public class HudManager : MonoBehaviour
         }
 
         slider.fillRect.localPosition = new Vector3(0, 0, 0);
+
     }
 }

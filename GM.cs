@@ -1,37 +1,56 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 public class GM : MonoBehaviour
 //Class responsable for game cycle 
 {
+    public int contFoodsEaten, contFoodsLost, contBadThingsEaten, contBadthingsLost, contPowersEaten, contPowerLost, contCoinsEaten, contCoinsLost; //game analytics variables
+    public float averageSliderLifevalue, sliderLess30, sliderBtw40n70, sliderOver100; // game analytics variables 
+
     [HideInInspector]
     static public GM gmInstance;
     [SerializeField]
-    private GameObject player, waiter;
+    GameObject player, waiter;
     PlayerScript playerScript;
 
-    public Text scoreText;
-    public Text coinText;
-    public GameObject _slider;
-    public GameObject[] listFood;
-    public GameObject[] listBadThings;
-    public GameObject[] listPowers;
-    public GameObject coin;
-
-
-    public GameObject menuGamveOver;
-    public GameObject menuChooseMode;
-    public GameObject menuPause;
-    public GameObject canvasMenu;
-
-    private BoxCollider2D footCollider;
-    private bool hitWaiter = false;
-    private bool creatSnacks = false;
     [SerializeField]
-    private float intFoodDelay = 0.01f;
-    private int score = 0;
-    private float life = 50f;
+    Text scoreText;
+    [SerializeField]
+    Text coinText;
+    [SerializeField]
+    GameObject _slider;
+    [SerializeField]
+    GameObject[] listFood;
+    [SerializeField]
+    GameObject[] listBadThings;
+    [SerializeField]
+    GameObject[] listPowers;
+    [SerializeField]
+    GameObject coin;
+    [SerializeField]
+    GameObject menuGamveOver;
+    [SerializeField]
+    GameObject menuChooseMode;
+    [SerializeField]
+    GameObject menuPause;
+    [SerializeField]
+    GameObject canvasMenu;
+    [SerializeField]
+    float intFoodDelay = 0.01f;
+    [SerializeField]
+    float timeCnt = 0.0f;
+
+    BoxCollider2D footCollider;
+    bool hitWaiter = false;
+    bool creatSnacks = false;
+
+    int score = 0;
+    int scoreRecord = 0;
+    float life = 50f;
 
     float foodQuant = 1f;
     float badThingsQuant = 3f;
@@ -52,7 +71,6 @@ public class GM : MonoBehaviour
 
     enum Scene { scene1, scene2 };
     Scene scene;
-
     bool startGame = false;
 
     bool score1 = true;
@@ -60,6 +78,7 @@ public class GM : MonoBehaviour
     bool score3 = false;
     bool score4 = false;
     bool score5 = false;
+
     void Start()
     {
         if (gmInstance != null)
@@ -82,7 +101,6 @@ public class GM : MonoBehaviour
         menuChooseMode.SetActive(true);
         menuPause.SetActive(false);
         canvasMenu.SetActive(true);
-
     }
 
     void Update()
@@ -91,6 +109,7 @@ public class GM : MonoBehaviour
         {
             life -= Time.deltaTime * 3;
             HudManager.hudInstance.UpdateSlider(life);
+            timeCnt += Time.deltaTime;
         }
     }
     //----SCENES----------------------
@@ -104,7 +123,7 @@ public class GM : MonoBehaviour
         player = (GameObject)Instantiate(player, player.transform.position, Quaternion.identity);
         waiter = (GameObject)Instantiate(waiter, new Vector3(-camWidth, -1.5f, 0f), Quaternion.identity);
         playerScript = player.GetComponent<PlayerScript>();
-
+        isGyro = scene2GyroTrueOrFalse;
         playerScript.GoCutScene(scene2GyroTrueOrFalse);
     }
     public void StartGame()
@@ -122,9 +141,9 @@ public class GM : MonoBehaviour
         while (!b_gameOver)
         {
             yield return new WaitForSeconds(foodQuant);
-            int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
+            int ranXposition = UnityEngine.Random.Range(-(int)camWidth, (int)camWidth);
             Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
-            int ranFood = Random.Range(0, listFood.Length);
+            int ranFood = UnityEngine.Random.Range(0, listFood.Length);
             GameObject instace = (GameObject)Instantiate(listFood[ranFood], initalPosition, Quaternion.identity);
             instace.GetComponent<Foods>().setSpeed(speedFood);
         }
@@ -134,9 +153,9 @@ public class GM : MonoBehaviour
         while (!b_gameOver)
         {
             yield return new WaitForSeconds(badThingsQuant);
-            int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
+            int ranXposition = UnityEngine.Random.Range(-(int)camWidth, (int)camWidth);
             Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
-            int ranFood = Random.Range(0, listBadThings.Length);
+            int ranFood = UnityEngine.Random.Range(0, listBadThings.Length);
             GameObject instace = (GameObject)Instantiate(listBadThings[ranFood], initalPosition, Quaternion.identity);
             instace.GetComponent<Foods>().setSpeed(speedBadT);
         }
@@ -146,9 +165,9 @@ public class GM : MonoBehaviour
         while (!b_gameOver)
         {
             yield return new WaitForSeconds(powersQuant);
-            int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
+            int ranXposition = UnityEngine.Random.Range(-(int)camWidth, (int)camWidth);
             Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
-            int ranFood = Random.Range(0, listPowers.Length);
+            int ranFood = UnityEngine.Random.Range(0, listPowers.Length);
             GameObject instace = (GameObject)Instantiate(listPowers[ranFood], initalPosition, Quaternion.identity);
             instace.GetComponent<Foods>().setSpeed(speedPower);
         }
@@ -159,9 +178,9 @@ public class GM : MonoBehaviour
         while (!b_gameOver)
         {
             yield return new WaitForSeconds(30);
-            int ranXposition = Random.Range(-(int)camWidth, (int)camWidth);
+            int ranXposition = UnityEngine.Random.Range(-(int)camWidth, (int)camWidth);
             Vector3 initalPosition = new Vector3(ranXposition, camHeight, 0f);
-            int ranFood = Random.Range(0, listPowers.Length);
+            int ranFood = UnityEngine.Random.Range(0, listPowers.Length);
             GameObject instace = (GameObject)Instantiate(coin, initalPosition, Quaternion.identity);
         }
     }
@@ -220,7 +239,7 @@ public class GM : MonoBehaviour
 
     public void setScore(int valuescore, int valuelife) //SET SCORE
     {
-
+        CheckRecord();
         CheckGameOver();
         IncreaseDifficulty();
 
@@ -243,6 +262,14 @@ public class GM : MonoBehaviour
         {
             SetBonus();
             print("BONUS!");
+        }
+    }
+
+    public void CheckRecord()
+    {
+        if (scoreRecord > score)
+        {
+            scoreRecord = score;
         }
     }
     public void SetBonus()
@@ -295,6 +322,9 @@ public class GM : MonoBehaviour
             playerScript.setDead();
 
             menuGamveOver.SetActive(true);
+            //Send performance to game analytics
+            MyAnalyticsManager.PublishMatchPerformance(timeCnt, contFoodsEaten, contBadThingsEaten, contPowersEaten, contCoinsEaten, contCoinsLost, contPowerLost, contFoodsLost, contBadthingsLost, averageSliderLifevalue, sliderOver100, sliderBtw40n70, sliderLess30);
+
         }
     }
 
@@ -306,5 +336,46 @@ public class GM : MonoBehaviour
         else
             return false;
     }
+
+    public void Save()
+    {
+        BinaryFormatter binaryf = new BinaryFormatter();
+        FileStream file = File.Create(Application.persistentDataPath + "/playerInfo.data");
+
+        PlayerData data = new PlayerData();
+        data.scoreRecord = scoreRecord;
+        data.isGyro = isGyro;
+
+        binaryf.Serialize(file, data);
+        file.Close();
+    }
+
+    public void Load()
+    {
+        if (File.Exists(Application.persistentDataPath + "/playerInfo.dat"))
+        {
+            BinaryFormatter binaryf = new BinaryFormatter();
+            FileStream file = File.Open(Application.persistentDataPath + "/playerInfo.dat", FileMode.Open);
+            PlayerData data = (PlayerData)binaryf.Deserialize(file);
+            file.Close();
+            scoreRecord = data.scoreRecord;
+            isGyro = data.isGyro;
+
+        }
+    }
+
+    void OnApplicationQuit()
+    {
+        Save();
+        MyAnalyticsManager.PublishMatchStoppedPerformance(timeCnt, contFoodsEaten, contBadThingsEaten, contPowersEaten, contCoinsEaten, contCoinsLost, contPowerLost, contFoodsLost, contBadthingsLost, averageSliderLifevalue, sliderOver100, sliderBtw40n70, sliderLess30);
+    }
+
+}
+
+[Serializable]
+class PlayerData
+{
+    public int scoreRecord;
+    public bool isGyro;
 
 }
