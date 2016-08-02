@@ -3,12 +3,11 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class HudManager : MonoBehaviour
+public class MenusManager : MonoBehaviour
 {
     //class responsable for Buttons and Hud
-
     [HideInInspector]
-    public static HudManager hudInstance;
+    public static MenusManager hudInstance;
     [SerializeField]
     Button btnContinue;
     [SerializeField]
@@ -22,22 +21,91 @@ public class HudManager : MonoBehaviour
     [SerializeField]
     Button btnSetGyro;
     [SerializeField]
+    Button btnStartGame;
+    [SerializeField]
     Slider slider;
     [SerializeField]
     float sliderSize;
+    [SerializeField]
+    GameObject canvasGamveOver;
+    [SerializeField]
+    GameObject canvasChooseMode;
+    [SerializeField]
+    GameObject canvasPause;
+    [SerializeField]
+    GameObject canvasStartMenu;
+    [SerializeField]
+    GameObject canvasSettings;
+    [SerializeField]
+    GameObject canvasHud;
+    [SerializeField]
+    GameObject _slider;
+    [SerializeField]
+    Text scoreText;
+    [SerializeField]
+    Text coinText;
 
-    void Start()
+    void Awake()
     {
         // btnPause.onClick.AddListener(() => { PauseMenu(); }); // if needed to accept any arguments 
         hudInstance = this;
-
+        DontDestroyOnLoad(transform.gameObject);
         btnPause.onClick.AddListener(PauseMenu);
         btnContinue.onClick.AddListener(ContinueGame);
         btnTryAgain.onClick.AddListener(TryAgainBtn);
         btnTryAgainGO.onClick.AddListener(TryAgainBtn);
+        canvasStartMenu.SetActive(true);
+        canvasSettings.SetActive(true);
+        canvasHud.SetActive(false);
+        canvasChooseMode.SetActive(false);
+        canvasPause.SetActive(false);
+        _slider.SetActive(false);
+
+    }
+
+    IEnumerator Start()
+    {
+        AsyncOperation async = Application.LoadLevelAdditiveAsync("Game");
+        yield return async;
+        Debug.Log("Loading complete");
+    }
+    public void SetScore(int num)
+    {
+        scoreText.text = (num.ToString("000"));
+    }
+
+    public void SetLife(float num)
+    {
+        slider.value += num;
+    }
+
+    public void StartSlider()
+    {
+        InvokeRepeating("LifeTime", 0.1f, 0.1f);
+    }
+
+    void LifeTime()
+    {
+        slider.value -= 0.1f;
+    }
+
+    public void StartGame()
+    {
+        GM.gmInstance.SetGameIntro();
+        canvasHud.SetActive(true);
+        _slider.SetActive(true);
+    }
+
+    public void setChooseMode()
+    {
+        // gamePart = GameParts.chooseMode;
+        canvasStartMenu.SetActive(false);
+        canvasChooseMode.SetActive(true);
+        canvasSettings.SetActive(false);
+        // playedFirst = true;
     }
     // Update is called once per frame
-    void PauseMenu()
+    public void PauseMenu()
     {
         Time.timeScale = 0f;
         print("PAUSE");
@@ -51,19 +119,22 @@ public class HudManager : MonoBehaviour
     public void TryAgainBtn()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene("Game");
+        GM.gmInstance.ResetGame();
     }
 
     public void SetGyro()
     {
-        GM.gmInstance.setScene1(true);
+        GM.isGyro = true;
+        GM.gmInstance.SetGameIntro();
+        PlayerScript.playerInstance.SetGyro();
     }
 
     public void SetTouch()
     {
-        GM.gmInstance.setScene1(false);
+        GM.isGyro = false;
+        GM.gmInstance.SetGameIntro();
+        PlayerScript.playerInstance.SetTouch();
     }
-
     public void UpdateSlider(float value)
     {
         slider.value = value;
@@ -81,8 +152,6 @@ public class HudManager : MonoBehaviour
         {
             GM.gmInstance.sliderOver100 += Time.deltaTime;
         }
-
-
         if (slider.value == 0)
         {
             sliderSize = slider.GetComponent<RectTransform>().rect.width;
@@ -104,4 +173,5 @@ public class HudManager : MonoBehaviour
         slider.fillRect.localPosition = new Vector3(0, 0, 0);
 
     }
+
 }

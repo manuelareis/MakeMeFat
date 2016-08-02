@@ -10,20 +10,16 @@ public class PlayerScript : MonoBehaviour
     Transform playerTransf;
     Rigidbody2D rb2d;
     Animator aninPlayer;
-
-    Camera cam;
-    float camHeight;
-    float camWidth;
     Touch touch;
-
     [SerializeField]
     float speed = 10f;
     [SerializeField]
     float rbSpeed = 500;
     float startLife = 50f;
+    Vector3 initalposition = new Vector3(0f, -2.9f, 0f);
 
-    enum Scene { scene1, scene2Touch, scene2Gyro };
-    Scene myScene;
+    enum PlayerControl { introGame, gameTouch, gameGyro };
+    PlayerControl playerControl;
 
     bool waiterInFront;
     bool isGyro = false;
@@ -36,43 +32,21 @@ public class PlayerScript : MonoBehaviour
             playerInstance = this;
         else
             Destroy(gameObject);
-        //cam sizes
-        cam = Camera.main;
-        camHeight = cam.orthographicSize;
-        camWidth = camHeight * cam.aspect;
 
         aninPlayer = GetComponentInChildren<Animator>();
         rb2d = GetComponent<Rigidbody2D>();
 
         waiterInFront = false;
+        transform.position = initalposition;
         //aninPlayer.SetBool("down", false);
-    }
-
-    void Update()
-    {
-        //CUTSCENE
-        if (myScene == Scene.scene1)
-        {
-            if (waiterInFront)
-            {
-                aninPlayer.SetTrigger("Down");
-                Waiter.waiterinstance.fallWaiter();
-                GM.gmInstance.StartGame();
-                print("isgyro: " + isGyro);
-                if (isGyro)
-                    myScene = Scene.scene2Gyro;
-                else
-                    myScene = Scene.scene2Touch;
-            }
-        }
     }
 
     void FixedUpdate()
     {
         //INPUT CONTROLLERS --------------------------------------------------------------------
-        //if the player has chosen the tpouch mode this will be the input used,
+        //if the player has chosen the touch mode this will be the input used,
         isGameOver = GM.gmInstance.GetGamOver();
-        if (myScene == Scene.scene2Touch && !isGameOver)
+        if (playerControl == PlayerControl.gameTouch && !isGameOver)
         {
             if (Input.GetButton("Fire1"))
             {
@@ -81,15 +55,14 @@ public class PlayerScript : MonoBehaviour
 
                 if (pos < Screen.width / 2)
                 {
-                    if (transform.position.x > -camWidth + 1f)
+                    if (transform.position.x > -CameraScript.camWidth + 1f)
                     {
                         transform.Translate(Vector3.left * speed * Time.deltaTime);
                     }
                 }
-
                 else if (pos > Screen.width / 2)
                 {
-                    if (transform.position.x < camWidth - 1f)
+                    if (transform.position.x < CameraScript.camWidth - 1f)
                     {
                         transform.Translate(Vector3.right * speed * Time.deltaTime);
                     }
@@ -97,7 +70,7 @@ public class PlayerScript : MonoBehaviour
             }
         }
         //change the controlers of the game for using gyroscope 
-        else if (myScene == Scene.scene2Gyro && !isGameOver)
+        else if (playerControl == PlayerControl.gameGyro && !isGameOver)
         {
             aninPlayer.SetBool("walking", true);
 
@@ -106,28 +79,24 @@ public class PlayerScript : MonoBehaviour
 
             if (gyroH < -0.1)
             {
-                if (transform.position.x > -camWidth + 1f)
+                if (transform.position.x > -CameraScript.camWidth + 1f)
                 {
                     transform.Translate(Vector3.left * speed * Time.deltaTime);
                 }
             }
             else if (gyroH > 0.1)
             {
-                if (transform.position.x < camWidth - 1f)
+                if (transform.position.x < CameraScript.camWidth - 1f)
                 {
                     transform.Translate(Vector3.right * speed * Time.deltaTime);
                 }
             }
         }
     }
-    //COLLISIONS --------------------------
+    //COLLISIONS -----------------------------------------
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("Waiter"))
-        {
-            waiterInFront = true;
-        }
-        else if (other.gameObject.CompareTag("Food"))
+        if (other.gameObject.CompareTag("Food"))
         {
             aninPlayer.SetTrigger("Eating");
             GM.gmInstance.setScore(5, 5);
@@ -173,41 +142,62 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    // The cutscene that happens before the game begins 
-    public void GoCutScene(bool boolGyro)
+    public void ResetPlayer()
     {
-        isGyro = boolGyro;
-
-        if (waiterInFront)
-        {
-            aninPlayer.SetTrigger("Down");
-            Waiter.waiterinstance.SendMessage("fallWaiter");
-            GM.gmInstance.SendMessage("setScene2");
-            print("isgyro: " + isGyro);
-            if (isGyro)
-                myScene = Scene.scene2Gyro;
-            else
-                myScene = Scene.scene2Touch;
-        }
+        aninPlayer.SetBool("Dead", false);
+        aninPlayer.SetBool("walking", false);
+        transform.position = initalposition;
+        playerControl = PlayerControl.introGame;
     }
+    /// <summary>
+    /// Set Dead Animation of the player
+    /// </summary>
     public void setDead()
     {
-        aninPlayer.SetTrigger("Dead");
+        aninPlayer.SetBool("Dead", true);
     }
+
+    /// <summary>
+    /// Set Animation waiting for food fall, with mouth opened
+    /// </summary>
     public void openMouth()
     {
         aninPlayer.SetBool("openMouth", true); // set animation of opening mouth
     }
 
+    /// <summary>
+    /// Set the speed of player
+    /// </summary>
     public void SetSpeed(float value)
     {
         speed = value;
     }
 
+    /// <summary>
+    /// Get the speed of the player
+    /// </summary>
     public float GetSpeed()
     {
         return speed;
     }
 
-    //---------------------------------------
+    public void MoveDown()
+    {
+        aninPlayer.SetTrigger("Down");
+    }
+
+    public void SetIntro()
+    {
+        playerControl = PlayerControl.introGame;
+    }
+    public void SetGyro()
+    {
+        playerControl = PlayerControl.gameGyro;
+    }
+    public void SetTouch()
+    {
+        playerControl = PlayerControl.gameTouch;
+    }
+
+    //----------------------------------------------------
 }
