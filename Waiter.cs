@@ -47,12 +47,13 @@ public class Waiter : MonoBehaviour
         if (walk)
         {
             transform.Translate(Vector3.right * Time.deltaTime * speed);
-            if (!falled && transform.position.x > -1)
+            if (!falled && transform.position.x > -2)
             {
                 StartCoroutine("fallWaiter");
                 PlayerScript.playerInstance.MoveDown();
                 GM.gmInstance.StartGame();
                 falled = true;
+                print("garcom caiu ");
             }
         }
     }

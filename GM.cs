@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 public class GM : MonoBehaviour
 //Class responsable for game cycle 
@@ -58,9 +59,6 @@ public class GM : MonoBehaviour
         else
             gmInstance = this;
 
-        DontDestroyOnLoad(transform.gameObject);
-
-
         //get script of player and set moves of scene 1
         footCollider = player.GetComponent<BoxCollider2D>();
         StartMenu();
@@ -72,47 +70,20 @@ public class GM : MonoBehaviour
     /// </summary>
     public void StartMenu()
     {
+        //player = Instantiate(Resources.Load("Prefabs/Player", typeof(GameObject))) as GameObject;
         player = (GameObject)Instantiate(player, player.transform.position, Quaternion.identity);
         waiter = (GameObject)Instantiate(waiter, new Vector3(-CameraScript.camWidth, -1.5f, 0f), Quaternion.identity);
-    }
-
-
-    public void ResetGame()
-    {
-        gamePart = GameParts.introGame;
-        StopAllCoroutines();
-        score = 0;
-        life = 50f;
-        foodQuant = 1f;
-        badThingsQuant = 3f;
-        powersQuant = 15f;
-        speedFood = 4f;
-        speedPower = 6f;
-        speedBadT = 5f;
-        SetGameIntro();
-        PlayerScript.playerInstance.ResetPlayer();
-        hitWaiter = false;
-        creatSnacks = false;
-        b_gameOver = false;
-        bonusExtra = false;
-        startGame = false;
-        score1 = true;
-        score2 = false;
-        score3 = false;
-        score4 = false;
-        score5 = false;
     }
 
     /// <summary>
     /// Set the firt part of game: the small introduction of waiter passing and the boy waiting 
     /// </summary>
-    public void SetGameIntro() //receive from Hud if is Gyro Or Not
+    public void SetGameIntro()
     {
         SoundsAndMusicMng.soundsIntance.StartCoroutine("StartMusicIntro");
         Time.timeScale = 1f;
         gamePart = GameParts.introGame;
         footCollider.enabled = false;
-        //player = Instantiate(Resources.Load("Prefabs/Player", typeof(GameObject))) as GameObject;
         Waiter.waiterinstance.StartWalk();
     }
 
@@ -122,7 +93,6 @@ public class GM : MonoBehaviour
     public void StartGame()
     {
         gamePart = GameParts.gameScreen;
-
         if (isGyro)
             PlayerScript.playerInstance.SetGyro();
         else
@@ -133,7 +103,6 @@ public class GM : MonoBehaviour
         StartCoroutine(CreatBadThings());
         print("started game");
     }
-
     public void PushMenuSettings()
     {
         Rect windowRect = new Rect(20, 20, 120, 50);
@@ -225,7 +194,6 @@ public class GM : MonoBehaviour
             AddVel(0.5f, 0.5f, 0.5f, 0.1f, 0.5f, 5);
             score5 = false;
         }
-
     }
 
     /// <summary>
@@ -319,18 +287,14 @@ public class GM : MonoBehaviour
         {
             b_gameOver = false;
         }
-
         else
         {
             b_gameOver = true;
             Time.timeScale = 0.5f;              //slowmotion
-
-            PlayerScript.playerInstance.setDead();
-
-            // canvasGamveOver.SetActive(true);
+            PlayerScript.playerInstance.setDead(); print("GameOver, comilao dead, gameOverMenu");
+            MenusManager.hudInstance.GameOverMenu();
             //Send performance to game analytics
             MyAnalyticsManager.PublishMatchPerformance(timeCnt, contFoodsEaten, contBadThingsEaten, contPowersEaten, contCoinsEaten, contCoinsLost, contPowerLost, contFoodsLost, contBadthingsLost, averageSliderLifevalue, sliderOver100, sliderBtw40n70, sliderLess30);
-
         }
     }
 
@@ -338,7 +302,6 @@ public class GM : MonoBehaviour
     {
         if (b_gameOver)
             return true;
-
         else
             return false;
     }
@@ -377,10 +340,13 @@ public class GM : MonoBehaviour
         MyAnalyticsManager.PublishMatchStoppedPerformance(timeCnt, contFoodsEaten, contBadThingsEaten, contPowersEaten, contCoinsEaten, contCoinsLost, contPowerLost, contFoodsLost, contBadthingsLost, averageSliderLifevalue, sliderOver100, sliderBtw40n70, sliderLess30);
     }
 
-    void OnApplicationPause(bool pauseStatus)
+    public void Reset()
     {
-        MenusManager.hudInstance.PauseMenu();
-        // canvasPause.SetActive(true);
+        SceneManager.UnloadScene("Game");
+        SceneManager.LoadSceneAsync("Game", LoadSceneMode.Additive);
+        gmInstance = null;
+        MenusManager.hudInstance = null;
+        SoundsAndMusicMng.soundsIntance = null;
     }
 }
 
@@ -390,5 +356,4 @@ class PlayerData
     public bool playedFirst;
     public int scoreRecord;
     public bool isGyro;
-
 }

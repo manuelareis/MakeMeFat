@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-
+//https://docs.unity3d.com/Manual/MultiSceneEditing.html
 public class PlayerScript : MonoBehaviour
 {
     [HideInInspector]
