@@ -7,7 +7,6 @@ using System.IO;
 using UnityEngine.SceneManagement;
 
 public class GM : MonoBehaviour
-//Class responsable for game cycle 
 {
     [HideInInspector]
     public int contFoodsEaten, contFoodsLost, contBadThingsEaten, contBadthingsLost, contPowersEaten, contPowerLost, contCoinsEaten, contCoinsLost; //game analytics variables
@@ -49,24 +48,19 @@ public class GM : MonoBehaviour
     bool startGame = false;
     bool score1 = true;
     bool score2, score3, score4, score5;
+
     enum GameParts { introGame, gameScreen, startMenu, settingsMenu, chooseMode };
     GameParts gamePart;
 
-    void Start()
+    void Awake()
     {
         if (gmInstance != null)
             Destroy(gameObject);
         else
             gmInstance = this;
-
-        //get script of player and set moves of scene 1
-        footCollider = player.GetComponent<BoxCollider2D>();
-        StartMenu();
     }
-
-    //----GameParts------------------------------------
     /// <summary>
-    /// Set the menu with the logo, the player with menu animation, and the settings menu tab aside
+    /// Instatiate the player and the waiter for the start menu
     /// </summary>
     public void StartMenu()
     {
@@ -74,19 +68,16 @@ public class GM : MonoBehaviour
         player = (GameObject)Instantiate(player, player.transform.position, Quaternion.identity);
         waiter = (GameObject)Instantiate(waiter, new Vector3(-CameraScript.camWidth, -1.5f, 0f), Quaternion.identity);
     }
-
     /// <summary>
     /// Set the firt part of game: the small introduction of waiter passing and the boy waiting 
     /// </summary>
     public void SetGameIntro()
     {
-        SoundsAndMusicMng.soundsIntance.StartCoroutine("StartMusicIntro");
         Time.timeScale = 1f;
         gamePart = GameParts.introGame;
-        footCollider.enabled = false;
+        // footCollider.enabled = false;      
         Waiter.waiterinstance.StartWalk();
     }
-
     /// <summary>
     /// The food start falling, and the game really starts
     /// </summary>
@@ -101,20 +92,16 @@ public class GM : MonoBehaviour
         StartCoroutine(CreatFood());
         StartCoroutine(CreatPowers());
         StartCoroutine(CreatBadThings());
+        StartCoroutine(CreatCoins());
         print("started game");
     }
-    public void PushMenuSettings()
-    {
-        Rect windowRect = new Rect(20, 20, 120, 50);
-    }
-    //-----------------------------------
     IEnumerator CreatFood()
     {
         while (!b_gameOver)
         {
             yield return new WaitForSeconds(foodQuant);
             int ranXposition = UnityEngine.Random.Range(-(int)CameraScript.camWidth, (int)CameraScript.camWidth);
-            Vector3 initalPosition = new Vector3(ranXposition, CameraScript.camHeight, 0f);
+            Vector3 initalPosition = new Vector3(ranXposition, CameraScript.camHeight + 2f, 0f);
             int ranFood = UnityEngine.Random.Range(0, listFood.Length);
             GameObject instace = (GameObject)Instantiate(listFood[ranFood], initalPosition, Quaternion.identity);
             instace.GetComponent<Foods>().setSpeed(speedFood);
@@ -126,7 +113,7 @@ public class GM : MonoBehaviour
         {
             yield return new WaitForSeconds(badThingsQuant);
             int ranXposition = UnityEngine.Random.Range(-(int)CameraScript.camWidth, (int)CameraScript.camWidth);
-            Vector3 initalPosition = new Vector3(ranXposition, CameraScript.camHeight, 0f);
+            Vector3 initalPosition = new Vector3(ranXposition, CameraScript.camHeight + 2f, 0f);
             int ranFood = UnityEngine.Random.Range(0, listBadThings.Length);
             GameObject instace = (GameObject)Instantiate(listBadThings[ranFood], initalPosition, Quaternion.identity);
             instace.GetComponent<Foods>().setSpeed(speedBadT);
@@ -138,7 +125,7 @@ public class GM : MonoBehaviour
         {
             yield return new WaitForSeconds(powersQuant);
             int ranXposition = UnityEngine.Random.Range(-(int)CameraScript.camWidth, (int)CameraScript.camWidth);
-            Vector3 initalPosition = new Vector3(ranXposition, CameraScript.camHeight, 0f);
+            Vector3 initalPosition = new Vector3(ranXposition, CameraScript.camHeight + 2f, 0f);
             int ranFood = UnityEngine.Random.Range(0, listPowers.Length);
             GameObject instace = (GameObject)Instantiate(listPowers[ranFood], initalPosition, Quaternion.identity);
             instace.GetComponent<Foods>().setSpeed(speedPower);
@@ -148,7 +135,7 @@ public class GM : MonoBehaviour
     {
         while (!b_gameOver)
         {
-            yield return new WaitForSeconds(30);
+            yield return new WaitForSeconds(15);
             int ranXposition = UnityEngine.Random.Range(-(int)CameraScript.camWidth, (int)CameraScript.camWidth);
             Vector3 initalPosition = new Vector3(ranXposition, CameraScript.camHeight, 0f);
             int ranFood = UnityEngine.Random.Range(0, listPowers.Length);
@@ -195,7 +182,6 @@ public class GM : MonoBehaviour
             score5 = false;
         }
     }
-
     /// <summary>
     /// Add difficulty for the game for each type of elements falling. Needed the new velocity of each type and number to decrease time of respawn
     /// </summary>
@@ -208,27 +194,29 @@ public class GM : MonoBehaviour
         badThingsQuant -= QtBadT;
         print(numLevel + " e qtBt: " + badThingsQuant);
     }
-
-
-    public void setScore(int valuescore, int valuelife) //SET SCORE
+    /// <summary>
+    /// Update the score and the life, send the menus manager the new score to print in the screen
+    /// </summary>
+    /// <param name="valuescore"></param>
+    /// <param name="valuelife"></param>
+    public void setScore(int valuescore, int valuelife)
     {
         CheckRecord();
         CheckGameOver();
         IncreaseDifficulty();
-
         if (life < 100 || b_gameOver == false)
         {
             if (bonusExtra) //Set life and Bonus with Extra
             {
-                score += valuescore + 10;               //Bonus extra of 10 points
-                //scoreText.text = (score.ToString("000"));
+                score += valuescore + 10; //bonus
                 life += valuelife;
+                MenusManager.hudInstance.SetScoreLife(score, life);
             }
             else
             {
                 score += valuescore;                    //normal score and life
-                //scoreText.text = (score.ToString("000"));
                 life += valuelife;
+                MenusManager.hudInstance.SetScoreLife(score, life);
             }
         }
         else if (life >= 100)
@@ -237,7 +225,9 @@ public class GM : MonoBehaviour
             print("BONUS!");
         }
     }
-
+    /// <summary>
+    /// Compare the actual score with the highscore to see if the player got a new highscore
+    /// </summary>
     public void CheckRecord()
     {
         if (highScore > score)
@@ -245,11 +235,17 @@ public class GM : MonoBehaviour
             highScore = score;
         }
     }
+    /// <summary>
+    /// allow the player to gain more 10 points bisides his normal score
+    /// </summary>
     public void SetBonus()
     {
         bonusExtra = true;
     }
-
+    /// <summary>
+    /// Set the Apple Power Up where all the things are falling get slower for 7 sec
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator PowerUpApple()
     {
         float TempspeedFood = speedFood;
@@ -264,7 +260,10 @@ public class GM : MonoBehaviour
         speedPower = TempspeedPower;
         speedBadT = TempspeedBadT;
     }
-
+    /// <summary>
+    /// Enable the powerUp of chili where the player speed is increased for 7 sec
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator PowerUpChilli()
     {
         float tempSpeed = PlayerScript.playerInstance.GetSpeed();
@@ -272,12 +271,10 @@ public class GM : MonoBehaviour
         yield return new WaitForSeconds(7);
         PlayerScript.playerInstance.SetSpeed(tempSpeed);
     }
-
     public void Coins()
     {
 
     }
-
     /// <summary>
     /// Check if the game is over set slowmotion, the dead animation of player, and the game over menu
     /// </summary>
@@ -297,7 +294,6 @@ public class GM : MonoBehaviour
             MyAnalyticsManager.PublishMatchPerformance(timeCnt, contFoodsEaten, contBadThingsEaten, contPowersEaten, contCoinsEaten, contCoinsLost, contPowerLost, contFoodsLost, contBadthingsLost, averageSliderLifevalue, sliderOver100, sliderBtw40n70, sliderLess30);
         }
     }
-
     public bool GetGamOver()
     {
         if (b_gameOver)
@@ -305,7 +301,6 @@ public class GM : MonoBehaviour
         else
             return false;
     }
-
     /// <summary>
     /// Save the high score, if is not the first match, and the play mode: gyroscope or touch 
     /// </summary>
@@ -320,7 +315,6 @@ public class GM : MonoBehaviour
         binaryf.Serialize(file, data);
         file.Close();
     }
-
     public void Load()
     {
         if (File.Exists(Application.persistentDataPath + "/playerInfo.dat"))
@@ -333,20 +327,13 @@ public class GM : MonoBehaviour
             isGyro = data.isGyro;
         }
     }
-
+    /// <summary>
+    /// Saves the game highscore, settings preferences and send the Analytics 
+    /// </summary>
     void OnApplicationQuit()
     {
         Save();
         MyAnalyticsManager.PublishMatchStoppedPerformance(timeCnt, contFoodsEaten, contBadThingsEaten, contPowersEaten, contCoinsEaten, contCoinsLost, contPowerLost, contFoodsLost, contBadthingsLost, averageSliderLifevalue, sliderOver100, sliderBtw40n70, sliderLess30);
-    }
-
-    public void Reset()
-    {
-        SceneManager.UnloadScene("Game");
-        SceneManager.LoadSceneAsync("Game", LoadSceneMode.Additive);
-        gmInstance = null;
-        MenusManager.hudInstance = null;
-        SoundsAndMusicMng.soundsIntance = null;
     }
 }
 

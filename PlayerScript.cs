@@ -5,22 +5,19 @@ public class PlayerScript : MonoBehaviour
 {
     [HideInInspector]
     public static PlayerScript playerInstance;
-    [SerializeField]
-    GameObject vomit;
-    Transform playerTransf;
-    Rigidbody2D rb2d;
-    Animator aninPlayer;
-    Touch touch;
+    // [SerializeField]GameObject vomit;
     [SerializeField]
     float speed = 10f;
     [SerializeField]
     float rbSpeed = 500;
+    Transform playerTransf;
+    Rigidbody2D rb2d;
+    Animator aninPlayer;
+    Touch touch;
     float startLife = 50f;
     Vector3 initalposition = new Vector3(0f, -2.9f, 0f);
-
     enum PlayerControl { introGame, gameTouch, gameGyro };
     PlayerControl playerControl;
-
     bool waiterInFront;
     bool isGyro = false;
     bool isGameOver = false;
@@ -35,15 +32,14 @@ public class PlayerScript : MonoBehaviour
 
         aninPlayer = GetComponentInChildren<Animator>();
         rb2d = GetComponent<Rigidbody2D>();
-
         waiterInFront = false;
         transform.position = initalposition;
         //aninPlayer.SetBool("down", false);
     }
-
+    //INPUT CONTROLLERS --------------------------------------------------------------------
     void FixedUpdate()
     {
-        //INPUT CONTROLLERS --------------------------------------------------------------------
+
         //if the player has chosen the touch mode this will be the input used,
         isGameOver = GM.gmInstance.GetGamOver();
         if (playerControl == PlayerControl.gameTouch && !isGameOver)
@@ -106,7 +102,7 @@ public class PlayerScript : MonoBehaviour
         else if (other.gameObject.CompareTag("BadThing"))
         {
             aninPlayer.SetTrigger("ThrowUp");
-            vomit.SetActive(true);
+            // vomit.SetActive(true);
             GM.gmInstance.setScore(0, -20);
             Destroy(other.gameObject);
             GM.gmInstance.contBadThingsEaten += 1;
@@ -135,13 +131,11 @@ public class PlayerScript : MonoBehaviour
 
         else if (other.gameObject.CompareTag("Coin"))
         {
-            // adicionar animacao  apple
             aninPlayer.SetTrigger("Eating");
             Destroy(other.gameObject);
             GM.gmInstance.contCoinsEaten += 1;
         }
     }
-
     public void ResetPlayer()
     {
         aninPlayer.SetBool("Dead", false);
@@ -156,7 +150,6 @@ public class PlayerScript : MonoBehaviour
     {
         aninPlayer.SetBool("Dead", true);
     }
-
     /// <summary>
     /// Set Animation waiting for food fall, with mouth opened
     /// </summary>
@@ -164,7 +157,6 @@ public class PlayerScript : MonoBehaviour
     {
         aninPlayer.SetBool("openMouth", true); // set animation of opening mouth
     }
-
     /// <summary>
     /// Set the speed of player
     /// </summary>
@@ -172,7 +164,6 @@ public class PlayerScript : MonoBehaviour
     {
         speed = value;
     }
-
     /// <summary>
     /// Get the speed of the player
     /// </summary>
@@ -180,12 +171,10 @@ public class PlayerScript : MonoBehaviour
     {
         return speed;
     }
-
     public void MoveDown()
     {
         aninPlayer.SetTrigger("Down");
     }
-
     public void SetIntro()
     {
         playerControl = PlayerControl.introGame;

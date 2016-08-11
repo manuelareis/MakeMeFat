@@ -7,17 +7,15 @@ public class Waiter : MonoBehaviour
     [HideInInspector]
     static public Waiter waiterinstance;
     [SerializeField]
-    float speed = 5;
+    Vector3 initialPosition = new Vector3(-19f, -5f, 0f);
     [SerializeField]
-    Vector3 initialPosition = new Vector3(-13f, -1.5f, 0f);
+    GameObject flyingThings;
+    [SerializeField]
+    GameObject flyingPosition;
     Animator aninWaiter;
-    Rigidbody2D waiterrb;
-    float rot = 90.0f;
-    Vector3 v3 = Vector3.zero;
-    bool isfacingright = true;
     bool walk;
     bool falled;
-    Transform waiterTransf;
+    float speed;
 
     void Awake()
     {
@@ -28,20 +26,23 @@ public class Waiter : MonoBehaviour
     }
     void Start()
     {
-        waiterrb = GetComponentInChildren<Rigidbody2D>();
+        speed = 10;
         aninWaiter = GetComponentInChildren<Animator>();
-        waiterTransf = GetComponent<Transform>();
         transform.position = initialPosition;
     }
+    /// <summary>
+    /// Reset the waiter to initial position with the walking animation
+    /// </summary>
     void ResetWaiter()
     {
+        speed = 10;
         aninWaiter.SetBool("fall", false);
         transform.position = initialPosition;
         transform.localRotation = Quaternion.identity;
         walk = false;
         falled = false;
-    }
 
+    }
     void Update()
     {
         if (walk)
@@ -49,35 +50,45 @@ public class Waiter : MonoBehaviour
             transform.Translate(Vector3.right * Time.deltaTime * speed);
             if (!falled && transform.position.x > -2)
             {
+                speed = 14;
                 StartCoroutine("fallWaiter");
-                PlayerScript.playerInstance.MoveDown();
-                GM.gmInstance.StartGame();
+
                 falled = true;
                 print("garcom caiu ");
             }
         }
     }
-
+    /// <summary>
+    /// Waiter Starts walkings
+    /// </summary>
     public void StartWalk()
     {
         walk = true;
     }
-
-    public void WaiterStartWalk()
-    {
-        InvokeRepeating("WalkWaiter", 0.1f, 0.1f);
-    }
-
+    /// <summary>
+    /// Waiter falling animation starts, after 1.5 sec he is reseted to initial position
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator fallWaiter()
     {
-        print("waiterfall");
         aninWaiter.SetBool("fall", true);
-        yield return new WaitForSeconds(1.5f);
+        PlayerScript.playerInstance.MoveDown();
+        StartCoroutine("FlyFood");
+        yield return new WaitForSeconds(1.2f);
         walk = false;
+        GM.gmInstance.StartGame();
         ResetWaiter();
-
     }
 
+    public IEnumerator FlyFood()
+    {
+        yield return new WaitForSeconds(0.25f);
+        flyingThings = (GameObject)Instantiate(flyingThings, flyingPosition.transform.position, Quaternion.identity);
+    }
+    /// <summary>
+    /// PingPong somethign in aValue speed from the aMin to aMax
+    /// </summary>
+    /// <returns></returns>
     float PingPong(float aValue, float aMin, float aMax)
     {
         return Mathf.PingPong(aValue, aMax - aMin) + aMin;
